@@ -1,0 +1,17 @@
+{
+    "bridge": {
+        "name": "HomeBridge",
+        "username": "AA:11:3D:E3:CE:30",
+        "port": 51826,
+        "pin": "111-33-444"
+    },
+    "description": "HomeBridge OpenWebif Standby Switch",
+    "accessories": [
+        {
+            "accessory": "OpenWebifSwitch",
+            "name": "Receiver Standby",
+            "host": "vusolo2",
+            "port": 80
+        }
+    ]
+}
