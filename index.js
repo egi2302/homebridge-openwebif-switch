@@ -39,12 +39,17 @@ OpenWebifSwitchAccessory.prototype = {
 						me.log('setPowerState() failed: %s', error.message);
 						callback(error, false);
 					} else {
-						me.log('setPowerState() succeded');
-						var result = JSON.parse(responseBody);
-						var powerOn = result.inStandby == "false";
+						try {
+							me.log('setPowerState() succeded');
+							var result = JSON.parse(responseBody);
+							var powerOn = result.inStandby == "false";
 
-						me.log('power is currently %s', powerOn ? 'ON' : 'OFF');
-						callback(null, powerOn);
+							me.log('power is currently %s', powerOn ? 'ON' : 'OFF');
+							callback(null, powerOn);
+						} catch (e) {
+							me.log('Error  %s', powerOn ? 'ON' : 'OFF');
+							callback(e, null);
+						}
 					}
 				}.bind(this));
 			} else {
