@@ -34,6 +34,7 @@ OpenWebifSwitchAccessory.prototype = {
 
 		ping.checkHostIsReachable(this.host, this.port, function(reachable) {
 			if (reachable) {
+				//{"instandby": false, "result": true}
 				me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate?newstate=" + (powerOn ? "0" : "0"), '', 'GET', function(error, response, responseBody) {
 					if (error) {
 						me.log('setPowerState() failed: %s', error.message);
@@ -76,10 +77,15 @@ OpenWebifSwitchAccessory.prototype = {
 						me.log('getPowerState() failed: %s', error.message);
 						callback(error);
 					} else {
-						var result = JSON.parse(responseBody);
-						var powerOn = result.inStandby == "false";
-						me.log('power is currently %s', powerOn ? 'ON' : 'OFF');
-						callback(null, powerOn);
+						try {
+							var result = JSON.parse(responseBody);
+							var powerOn = result.inStandby == "false";
+							me.log('power is currently %s', powerOn ? 'ON' : 'OFF');
+							callback(null, powerOn);
+						} catch (e) {
+							callback(e, null);
+							me.log('error parsing: ' + e);
+						}
 					}
 				}.bind(this));
 			} else {
