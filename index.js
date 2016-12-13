@@ -17,6 +17,18 @@ function OpenWebifSwitchAccessory(log, config) {
 	//required
 	this.host = config["host"];
 	this.port = config["port"] || 80;
+	this.checkIntervalSeconds = config["checkIntervalSeconds"] || 120;
+
+	var me = this;
+	if (this.checkIntervalSeconds > 0) {
+		setInterval(function() {
+			me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate", '', 'GET', function(error, response, responseBody) {
+				var result = JSON.parse(responseBody);
+				var powerOnCurrent = result.instandby === false;
+				me.switchService.setCharacteristic(Characteristic.On, powerOnCurrent);
+			});
+		}, this.checkIntervalSeconds * 1000);
+	} 
 }
 
 OpenWebifSwitchAccessory.prototype = {

@@ -12,13 +12,15 @@ HomeBridge: https://github.com/nfarina/homebridge
 
 # Configuration
 
- ```
+ <pre>
 "accessories": [
         {
             "accessory": "OpenWebifSwitch",
             "name": "Receiver Standby",
             "host": "vusolo2",
-            "port": 80
+            <i>"port": 80,</i>
+            <i>"checkIntervalSeconds": 120</i>
         }
     ]
-```
+</pre>
+optional settings written in italic font
