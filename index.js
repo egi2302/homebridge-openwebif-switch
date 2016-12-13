@@ -34,25 +34,39 @@ OpenWebifSwitchAccessory.prototype = {
 
 		ping.checkHostIsReachable(this.host, this.port, function(reachable) {
 			if (reachable) {
-				//{"instandby": false, "result": true}
-				me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate?newstate=" + (powerOn ? "0" : "0"), '', 'GET', function(error, response, responseBody) {
-					if (error) {
-						me.log('setPowerState() failed: %s', error.message);
-						callback(error, false);
-					} else {
-						try {
-							me.log('setPowerState() succeded');
-							var result = JSON.parse(responseBody);
-							var powerOn = result.inStandby == "false";
+				//Check Standby-State				
+				me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate", '', 'GET', function(error, response, responseBody) {
+					var result = JSON.parse(responseBody);
+					var powerOnCurrent = result.inStandby == "false";
+					me.log('setPowerState() - currentState: ' + powerOnCurrent);
 
-							me.log('power is currently %s', powerOn ? 'ON' : 'OFF');
-							callback(null, powerOn);
-						} catch (e) {
-							me.log('Error  %s', powerOn ? 'ON' : 'OFF');
-							callback(e, null);
-						}
-					}
-				}.bind(this));
+					//{"instandby": false, "result": true}
+					if (powerOnCurrent === powerOn) {
+						//state like expected. nothing to do
+						me.log('setPowerState() - nothing to do');
+						callback(null, powerOn);
+					} else { //State setzen
+
+						me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate?newstate=" + (powerOn ? "0" : "0"), '', 'GET', function(error, response, responseBody) {
+							if (error) {
+								me.log('setPowerState() failed: %s', error.message);
+								callback(error, false);
+							} else {
+								try {
+									me.log('setPowerState() succeded');
+									var result = JSON.parse(responseBody);
+									var powerOn = result.inStandby == "false";
+
+									me.log('power is currently %s', powerOn ? 'ON' : 'OFF');
+									callback(null, powerOn);
+								} catch (e) {
+									me.log('Error  %s', powerOn ? 'ON' : 'OFF');
+									callback(e, null);
+								}
+							}
+						}.bind(this));
+					} //if
+				});
 			} else {
 				callback(null, powerOn ? false : true); //totally off ->
 			}
