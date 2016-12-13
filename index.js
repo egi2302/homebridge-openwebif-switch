@@ -22,6 +22,7 @@ function OpenWebifSwitchAccessory(log, config) {
 OpenWebifSwitchAccessory.prototype = {
 
 	setPowerState: function (powerOn, callback) {
+		powerOn = powerOn ? true : false; //number to boolean
 		if (!this.host) {
 			callback(new Error("No host defined."));
 		}
@@ -37,11 +38,11 @@ OpenWebifSwitchAccessory.prototype = {
 				//Check Standby-State				
 				me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate", '', 'GET', function(error, response, responseBody) {
 					var result = JSON.parse(responseBody);
-					var powerOnCurrent = result.inStandby == "false";
+					var powerOnCurrent = result.instandby === false;
 					me.log('setPowerState() - currentState: ' + powerOnCurrent);
 
 					//{"instandby": false, "result": true}
-					if (powerOnCurrent === powerOn) {
+					if (powerOnCurrent == powerOn) {
 						//state like expected. nothing to do
 						me.log('setPowerState() - nothing to do');
 						callback(null, powerOn);
