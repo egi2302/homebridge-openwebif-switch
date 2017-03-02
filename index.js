@@ -11,7 +11,7 @@ module.exports = function (homebridge) {
 
 function OpenWebifSwitchAccessory(log, config) {
 	this.log = log;
-	
+
 	this.name = config["name"];
 
 	//required
@@ -21,14 +21,18 @@ function OpenWebifSwitchAccessory(log, config) {
 
 	var me = this;
 	if (this.checkIntervalSeconds > 0) {
-		setInterval(function() {
-			me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate", '', 'GET', function(error, response, responseBody) {
-				var result = JSON.parse(responseBody);
-				var powerOnCurrent = result.instandby === false;
-				me.switchService.setCharacteristic(Characteristic.On, powerOnCurrent);
+		setInterval(function () {
+			ping.checkHostIsReachable(this.host, this.port, function (reachable) {
+				if (reachable) {
+					me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate", '', 'GET', function (error, response, responseBody) {
+						var result = JSON.parse(responseBody);
+						var powerOnCurrent = result.instandby === false;
+						me.switchService.setCharacteristic(Characteristic.On, powerOnCurrent);
+					});
+				}
 			});
-		}, this.checkIntervalSeconds * 1000);
-	} 
+		}, me.checkIntervalSeconds * 1000);
+	}
 }
 
 OpenWebifSwitchAccessory.prototype = {
@@ -45,10 +49,10 @@ OpenWebifSwitchAccessory.prototype = {
 		var me = this;
 		me.log('Power state change request: ', powerOn);
 
-		ping.checkHostIsReachable(this.host, this.port, function(reachable) {
+		ping.checkHostIsReachable(this.host, this.port, function (reachable) {
 			if (reachable) {
 				//Check Standby-State				
-				me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate", '', 'GET', function(error, response, responseBody) {
+				me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate", '', 'GET', function (error, response, responseBody) {
 					var result = JSON.parse(responseBody);
 					var powerOnCurrent = result.instandby === false;
 					me.log('setPowerState() - currentState: ' + powerOnCurrent);
@@ -60,7 +64,7 @@ OpenWebifSwitchAccessory.prototype = {
 						callback(null, powerOn);
 					} else { //State setzen
 
-						me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate?newstate=" + (powerOn ? "0" : "0"), '', 'GET', function(error, response, responseBody) {
+						me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate?newstate=" + (powerOn ? "0" : "0"), '', 'GET', function (error, response, responseBody) {
 							if (error) {
 								me.log('setPowerState() failed: %s', error.message);
 								callback(error, false);
@@ -97,9 +101,9 @@ OpenWebifSwitchAccessory.prototype = {
 
 		var me = this;
 
-		ping.checkHostIsReachable(this.host, this.port, function(reachable) {
+		ping.checkHostIsReachable(this.host, this.port, function (reachable) {
 			if (reachable) {
-				me._httpRequest("http://" + me.host + ":" + me.port + "/api/statusinfo", '', 'GET', function(error, response, responseBody) {
+				me._httpRequest("http://" + me.host + ":" + me.port + "/api/statusinfo", '', 'GET', function (error, response, responseBody) {
 					if (error) {
 						me.log('getPowerState() failed: %s', error.message);
 						callback(error);
@@ -130,8 +134,8 @@ OpenWebifSwitchAccessory.prototype = {
 		var informationService = new Service.AccessoryInformation();
 		informationService
 			.setCharacteristic(Characteristic.Manufacturer, "alex224")
-			.setCharacteristic(Characteristic.Model, "433Mhz Send Module")
-			.setCharacteristic(Characteristic.SerialNumber, "Send433 Serial Number");
+			.setCharacteristic(Characteristic.Model, "OpenWebifSwitch")
+			.setCharacteristic(Characteristic.SerialNumber, "OpenWebifSwitch Serial Number");
 
 		this.switchService = new Service.Switch(this.name);
 		this.switchService
@@ -141,15 +145,15 @@ OpenWebifSwitchAccessory.prototype = {
 		return [informationService, this.switchService];
 	},
 
-	_httpRequest: function(url, body, method, callback) {
-        request({
-            url: url,
-            body: body,
-            method: method,
-            rejectUnauthorized: false
-        },
-        function(error, response, body) {
-            callback(error, response, body);
-        });
-    },
+	_httpRequest: function (url, body, method, callback) {
+		request({
+			url: url,
+			body: body,
+			method: method,
+			rejectUnauthorized: false
+		},
+			function (error, response, body) {
+				callback(error, response, body);
+			});
+	},
 };
