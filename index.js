@@ -22,7 +22,7 @@ function OpenWebifSwitchAccessory(log, config) {
 	var me = this;
 	if (this.checkIntervalSeconds > 0) {
 		setInterval(function () {
-			ping.checkHostIsReachable(this.host, this.port, function (reachable) {
+			ping.checkHostIsReachable(me.host, me.port, function (reachable) {
 				if (reachable) {
 					me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate", '', 'GET', function (error, response, responseBody) {
 						var result = JSON.parse(responseBody);
@@ -49,7 +49,7 @@ OpenWebifSwitchAccessory.prototype = {
 		var me = this;
 		me.log('Power state change request: ', powerOn);
 
-		ping.checkHostIsReachable(this.host, this.port, function (reachable) {
+		ping.checkHostIsReachable(me.host, me.port, function (reachable) {
 			if (reachable) {
 				//Check Standby-State				
 				me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate", '', 'GET', function (error, response, responseBody) {
@@ -101,7 +101,7 @@ OpenWebifSwitchAccessory.prototype = {
 
 		var me = this;
 
-		ping.checkHostIsReachable(this.host, this.port, function (reachable) {
+		ping.checkHostIsReachable(me.host, me.port, function (reachable) {
 			if (reachable) {
 				me._httpRequest("http://" + me.host + ":" + me.port + "/api/statusinfo", '', 'GET', function (error, response, responseBody) {
 					if (error) {
