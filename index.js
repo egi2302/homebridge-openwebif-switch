@@ -25,9 +25,14 @@ function OpenWebifSwitchAccessory(log, config) {
 			ping.checkHostIsReachable(me.host, me.port, function (reachable) {
 				if (reachable) {
 					me._httpRequest("http://" + me.host + ":" + me.port + "/api/powerstate", '', 'GET', function (error, response, responseBody) {
-						var result = JSON.parse(responseBody);
-						var powerOnCurrent = result.instandby === false;
-						me.switchService.setCharacteristic(Characteristic.On, powerOnCurrent);
+						try {
+							var result = JSON.parse(responseBody);
+							var powerOnCurrent = result.instandby === false;
+							me.switchService.setCharacteristic(Characteristic.On, powerOnCurrent);
+						} catch (error) {
+							me.log('Error  %s', powerOn ? 'ON' : 'OFF');
+							//dont change Characteristic value						
+						}
 					});
 				}
 			});
