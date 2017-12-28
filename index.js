@@ -151,11 +151,19 @@ OpenWebifSwitchAccessory.prototype = {
 	},
 
 	_httpRequest: function (url, body, method, callback) {
+		var request = require('request'),
+		username = "USERNAME",
+		password = "PASSWORD",
+		auth = "Basic " + new Buffer(username + ":" + password).toString("base64");
+		
 		request({
 			url: url,
 			body: body,
 			method: method,
-			rejectUnauthorized: false
+			rejectUnauthorized: false,
+			headers : {
+            			"Authorization" : auth
+        		}
 		},
 			function (error, response, body) {
 				callback(error, response, body);
